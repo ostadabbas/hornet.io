@@ -1,0 +1,1332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <!-- Primary Meta Tags -->
+  <meta name="title" content="HORNet: Task-Guided Frame Selection for Video Question Answering with Vision-Language Models">
+  <meta name="description" content="HORNet is a lightweight GRPO-trained frame selection policy that optimizes what a frozen VLM sees, reducing input frames by up to 99% while improving answer quality.">
+  <meta name="keywords" content="HORNet, Video QA, Frame Selection, GRPO, VLM, Vision-Language Models, Reinforcement Learning, Select Any Frames">
+  <meta name="author" content="Xiangyu Bai, Bishoy Galoaa, Sarah Ostadabbas">
+  <meta name="robots" content="index, follow">
+  <meta name="language" content="English">
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Augmented Cognition Lab - Northeastern University">
+  <meta property="og:title" content="HORNet: Task-Guided Frame Selection for Video QA">
+  <meta property="og:description" content="A lightweight GRPO-trained frame selection policy that optimizes what a frozen VLM sees, reducing frames by up to 99% while improving answer quality.">
+  <meta property="og:url" content="https://ostadabbas.github.io/HORNet">
+  <meta property="og:image" content="assets/hornet_logo.png">
+  <meta property="article:published_time" content="2026-03-19T00:00:00.000Z">
+  <meta property="article:author" content="Xiangyu Bai">
+  <meta property="article:section" content="Research">
+  <meta property="article:tag" content="Video QA">
+  <meta property="article:tag" content="Frame Selection">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="HORNet: Task-Guided Frame Selection for Video QA">
+  <meta name="twitter:description" content="A lightweight GRPO-trained frame selection policy that optimizes what a frozen VLM sees.">
+  <meta name="twitter:image" content="assets/hornet_logo.png">
+
+  <!-- Academic/Research Specific -->
+  <meta name="citation_title" content="HORNet: Task-Guided Frame Selection for Video Question Answering with Vision-Language Models">
+  <meta name="citation_author" content="Bai, Xiangyu">
+  <meta name="citation_author" content="Galoaa, Bishoy">
+  <meta name="citation_author" content="Ostadabbas, Sarah">
+  <meta name="citation_publication_date" content="2026">
+  <meta name="citation_pdf_url" content="https://arxiv.org/pdf/2603.18850">
+  
+  <!-- Additional SEO -->
+  <meta name="theme-color" content="#f59e0b">
+  
+  <!-- Preconnect for performance -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/webp" href="assets/OIP.webp">
+  <link rel="shortcut icon" type="image/webp" href="assets/OIP.webp">
+  <link rel="apple-touch-icon" href="assets/OIP.webp">
+
+  <title>HORNet: Task-Guided Frame Selection for Video QA</title>
+  
+  <!-- Bulma CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  
+  <!-- Academicons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --hornet-gold: #f59e0b;
+      --hornet-dark: #1a1a2e;
+      --hornet-accent: #ff6b35;
+      --hornet-blue: #3b82f6;
+      --hornet-green: #10b981;
+      --hornet-red: #ef4444;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+
+    .hero-hornet {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      padding: 4rem 1.5rem;
+    }
+
+    .publication-title {
+      color: white !important;
+      font-size: 2.5rem !important;
+      font-weight: 800 !important;
+      line-height: 1.2;
+    }
+
+    .publication-title .highlight {
+      background: linear-gradient(90deg, var(--hornet-gold), var(--hornet-accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .publication-authors {
+      color: #cbd5e1 !important;
+      margin-top: 1rem;
+    }
+
+    .publication-authors a {
+      color: #93c5fd;
+      text-decoration: none;
+    }
+
+    .publication-authors a:hover {
+      text-decoration: underline;
+    }
+
+    .publication-links {
+      margin-top: 1.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      justify-content: center;
+    }
+
+    .publication-links .button {
+      border-radius: 50px;
+      font-weight: 600;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .publication-links .button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+
+    .btn-arxiv { background: #b31b1b !important; border-color: #b31b1b !important; color: white !important; }
+    .btn-github { background: #333 !important; border-color: #333 !important; color: white !important; }
+    .btn-hf { background: #ff9d00 !important; border-color: #ff9d00 !important; color: white !important; }
+
+    /* Logo Section */
+    .hornet-logo {
+      max-width: 60px;
+      filter: drop-shadow(0 0 20px rgba(245, 158, 11, 0.3));
+      vertical-align: middle;
+      margin-right: 0.75rem;
+    }
+
+    .title-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    /* Teaser / Pipeline */
+    .pipeline-section {
+      padding: 3rem 1.5rem;
+      background: #fafafa;
+    }
+
+    .pipeline-img {
+      border-radius: 12px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.12);
+      max-width: 100%;
+    }
+
+    /* Abstract */
+    .abstract-section {
+      background: white;
+    }
+
+    /* Frame Comparison - Creative Visual */
+    .frame-comparison-section {
+      background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+      padding: 4rem 1.5rem;
+    }
+
+    .comparison-card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+      overflow: hidden;
+      margin-bottom: 2rem;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .comparison-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+    }
+
+    .comparison-header {
+      padding: 1.5rem 2rem;
+      background: var(--hornet-dark);
+      color: white;
+    }
+
+    .comparison-header h4 {
+      color: white;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    .comparison-header .question-badge {
+      background: var(--hornet-gold);
+      color: var(--hornet-dark);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      display: inline-block;
+      margin-top: 0.5rem;
+    }
+
+    .comparison-body {
+      padding: 1.5rem;
+    }
+
+    .method-row {
+      margin-bottom: 1.5rem;
+    }
+
+    .method-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .method-badge {
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .method-badge.baseline {
+      background: #fee2e2;
+      color: var(--hornet-red);
+    }
+
+    .method-badge.hornet {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .frames-strip {
+      display: flex;
+      gap: 4px;
+      overflow-x: auto;
+      padding: 8px;
+      background: #f1f5f9;
+      border-radius: 8px;
+      position: relative;
+    }
+
+    .frames-strip::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      border-radius: 8px;
+      pointer-events: none;
+    }
+
+    .frames-strip.baseline-strip::before {
+      border: 2px dashed #fca5a5;
+    }
+
+    .frames-strip.hornet-strip::before {
+      border: 2px solid #6ee7b7;
+    }
+
+    .frame-thumb {
+      min-width: 80px;
+      height: 60px;
+      border-radius: 4px;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    .frame-thumb.dimmed {
+      opacity: 0.3;
+      filter: grayscale(0.5);
+    }
+
+    .frame-thumb.selected {
+      outline: 3px solid var(--hornet-green);
+      outline-offset: 1px;
+    }
+
+    .frame-placeholder {
+      min-width: 80px;
+      height: 60px;
+      border-radius: 4px;
+      background: #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      color: #94a3b8;
+      flex-shrink: 0;
+    }
+
+    /* Timeline visualization */
+    .timeline-container {
+      position: relative;
+      margin: 2rem 0;
+    }
+
+    .timeline-bar {
+      height: 8px;
+      background: #e2e8f0;
+      border-radius: 4px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .timeline-marker {
+      position: absolute;
+      top: -4px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      transform: translateX(-50%);
+    }
+
+    .timeline-marker.uniform {
+      background: var(--hornet-red);
+      opacity: 0.6;
+    }
+
+    .timeline-marker.hornet-selected {
+      background: var(--hornet-green);
+      box-shadow: 0 0 8px rgba(16, 185, 113, 0.5);
+    }
+
+    /* Verdict row */
+    .verdict-row {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .verdict-item {
+      flex: 1;
+      min-width: 200px;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+    }
+
+    .verdict-item.correct {
+      background: #ecfdf5;
+      border-left: 4px solid var(--hornet-green);
+    }
+
+    .verdict-item.incorrect {
+      background: #fef2f2;
+      border-left: 4px solid var(--hornet-red);
+    }
+
+    .verdict-item.gt {
+      background: #eff6ff;
+      border-left: 4px solid var(--hornet-blue);
+    }
+
+    .verdict-label {
+      font-weight: 700;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      margin-bottom: 0.25rem;
+      color: #64748b;
+    }
+
+    /* Stats Section */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin: 2rem 0;
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      border-top: 4px solid var(--hornet-gold);
+    }
+
+    .stat-number {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--hornet-dark);
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 0.5rem;
+    }
+
+    /* Results Table Styling */
+    .results-section {
+      padding: 4rem 1.5rem;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+
+    /* Research Gap Table */
+    .gap-table-wrapper {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    /* BibTeX */
+    .bibtex-section {
+      background: #1e293b;
+      padding: 3rem 1.5rem;
+    }
+
+    .bibtex-box {
+      background: #0f172a;
+      border-radius: 12px;
+      padding: 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .bibtex-box pre {
+      color: #e2e8f0;
+      font-size: 0.8rem;
+      white-space: pre-wrap;
+      word-break: break-all;
+      background: transparent;
+      padding: 0;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: var(--hornet-gold);
+      color: var(--hornet-dark);
+      border: none;
+      border-radius: 6px;
+      padding: 6px 12px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.8rem;
+      transition: background 0.2s;
+    }
+
+    .copy-btn:hover {
+      background: #d97706;
+    }
+
+    /* Footer */
+    .hornet-footer {
+      background: var(--hornet-dark);
+      padding: 2rem 1.5rem;
+      color: #94a3b8;
+      text-align: center;
+    }
+
+    .hornet-footer a {
+      color: var(--hornet-gold);
+    }
+
+    /* Scroll to Top */
+    .scroll-to-top {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 45px;
+      height: 45px;
+      background: var(--hornet-gold);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1.2rem;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      display: none;
+      z-index: 999;
+      transition: transform 0.2s;
+    }
+
+    .scroll-to-top:hover {
+      transform: translateY(-3px);
+    }
+
+    /* Comparison Carousel */
+    .comparison-carousel {
+      position: relative;
+    }
+
+    .comparison-slide {
+      display: none;
+    }
+
+    .comparison-slide.active {
+      display: block;
+      animation: fadeIn 0.4s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .carousel-nav-bar {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .carousel-nav-btn {
+      background: var(--hornet-dark);
+      color: white;
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background 0.2s;
+    }
+
+    .carousel-nav-btn:hover {
+      background: var(--hornet-gold);
+    }
+
+    .carousel-nav-btn:disabled {
+      background: #cbd5e1;
+      cursor: not-allowed;
+    }
+
+    .carousel-indicator {
+      font-weight: 600;
+      color: #475569;
+    }
+
+    /* Encoder figure */
+    .figure-container {
+      text-align: center;
+      margin: 2rem 0;
+    }
+
+    .figure-container img {
+      max-width: 100%;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+
+    .figure-caption {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 0.75rem;
+      font-style: italic;
+    }
+
+    /* Encoder side-by-side layout */
+    .encoder-layout {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+    }
+
+    .encoder-layout .encoder-img {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .encoder-layout .encoder-img img {
+      max-width: 100%;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+
+    .encoder-layout .encoder-text {
+      flex: 1;
+      min-width: 0;
+    }
+
+    /* Ablation tables side-by-side */
+    .ablation-row {
+      display: flex;
+      gap: 2rem;
+      align-items: flex-start;
+    }
+
+    .ablation-row .ablation-col {
+      flex: 1;
+      min-width: 0;
+    }
+
+    @media (max-width: 768px) {
+      .encoder-layout {
+        flex-direction: column;
+      }
+      .ablation-row {
+        flex-direction: column;
+      }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .publication-title {
+        font-size: 1.8rem !important;
+      }
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .frames-strip {
+        flex-wrap: nowrap;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Scroll to Top Button -->
+  <button class="scroll-to-top" id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+    <i class="fas fa-chevron-up"></i>
+  </button>
+
+  <!-- Hero Section -->
+  <section class="hero-hornet">
+    <div class="container is-max-desktop has-text-centered">
+      <div class="title-row">
+        <img src="assets/hornet_logo.png" alt="HORNet Logo" class="hornet-logo">
+        <h1 class="publication-title">
+          <span class="highlight">HORNet</span>: Task-Guided Frame Selection for<br>Video Question Answering with Vision-Language Models
+        </h1>
+      </div>
+      <div class="is-size-5 publication-authors">
+        <a href="#">Xiangyu Bai</a><sup>*</sup>,&nbsp;
+        <a href="#">Bishoy Galoaa</a><sup>*</sup>,&nbsp;
+        <a href="#">Sarah Ostadabbas</a>
+      </div>
+      <div class="is-size-6 publication-authors" style="margin-top:0.5rem; opacity:0.8;">
+        Northeastern University, Boston, MA, USA<br>
+        <span style="font-size:0.8rem;">*Equal contribution</span>
+      </div>
+
+      <div class="publication-links">
+        <a href="https://arxiv.org/abs/2603.18850" class="button btn-arxiv" target="_blank">
+          <span class="icon"><i class="ai ai-arxiv"></i></span>
+          <span>arXiv</span>
+        </a>
+        <a href="https://github.com/ostadabbas/HORNet" class="button btn-github" target="_blank">
+          <span class="icon"><i class="fab fa-github"></i></span>
+          <span>Code</span>
+        </a>
+        <a href="https://huggingface.co/bishoygaloaa/HORnet" class="button btn-hf" target="_blank">
+          <span class="icon">🤗</span>
+          <span>Model</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Key Stats -->
+  <section class="section" style="padding-top:3rem; padding-bottom:2rem;">
+    <div class="container is-max-desktop">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-number">&lt;1M</div>
+          <div class="stat-label">Trainable Parameters</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">99%</div>
+          <div class="stat-label">Frame Reduction</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">93%</div>
+          <div class="stat-label">Faster Processing</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">+7.3</div>
+          <div class="stat-label">NExT-QA Gain (pts)</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pipeline Figure -->
+  <section class="pipeline-section">
+    <div class="container is-max-desktop">
+      <h2 class="title is-3 has-text-centered mb-5">HORNet Pipeline</h2>
+      <div class="figure-container">
+        <img src="assets/hornet_pipeline.png" alt="HORNet Pipeline" class="pipeline-img">
+        <p class="figure-caption">
+          <strong>Figure 1.</strong> Given a video with T uniformly sampled frames, a TimeSFormer-based encoder extracts per-frame features. 
+          A lightweight MLP policy &pi;<sub>&theta;</sub> scores each frame, producing a binary selection mask. Only selected frames are passed 
+          to the frozen Qwen3-VL answerer. GRPO trains the policy using group-normalized rewards from the VLM's answers.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Abstract -->
+  <section class="section abstract-section">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column is-10">
+          <h2 class="title is-3 has-text-centered">Abstract</h2>
+          <div class="content has-text-justified" style="font-size:1.05rem; line-height:1.8;">
+            <p>
+              Video question answering (VQA) with vision-language models (VLMs) depends critically on which frames are selected from the input video, yet most systems rely on uniform or heuristic sampling that cannot be optimized for downstream answering quality. We introduce <strong>HORNet</strong>, a lightweight frame selection policy trained with Group Relative Policy Optimization (GRPO) to learn which frames a frozen VLM needs to answer questions correctly. With fewer than 1M trainable parameters, HORNet reduces input frames by up to 99% and VLM processing time by up to 93%, while improving answer quality on short-form benchmarks (+1.7% F1 on MSVD-QA) and achieving strong performance on temporal reasoning tasks (+7.3 points over uniform sampling on NExT-QA). We formalize this as <strong>Select Any Frames (SAF)</strong>, a task that decouples visual input curation from VLM reasoning, and show that GRPO-trained selection generalizes better out-of-distribution than supervised and PPO alternatives. HORNet's policy further transfers across VLM answerers without retraining, yielding an additional 8.5% relative gain when paired with a stronger model.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Research Gap -->
+  <section class="section" style="background:#f8fafc;">
+    <div class="container is-max-desktop">
+      <h2 class="title is-3 has-text-centered mb-5">Research Gap</h2>
+      <p class="has-text-centered mb-5" style="color:#64748b;">
+        Existing frame selection methods satisfy at most two of four desirable properties. <strong>HORNet is the first to achieve all four.</strong>
+      </p>
+      <div class="figure-container">
+        <img src="assets/hornet_research_gap.png" alt="Research Gap Table" style="max-width:700px;">
+      </div>
+    </div>
+  </section>
+
+  <!-- Encoder Architecture -->
+  <section class="section">
+    <div class="container is-max-desktop">
+      <h2 class="title is-3 has-text-centered mb-5">Video Encoder Architecture</h2>
+      <div class="encoder-layout">
+        <div class="encoder-img">
+          <img src="assets/hornet_encoder.png" alt="HORNet Encoder">
+        </div>
+        <div class="encoder-text">
+          <p class="content has-text-justified" style="font-size:0.95rem; line-height:1.7;">
+            <strong>Figure 2.</strong> HORNet encoder <em>E</em> is built on the TimeSFormer architecture. Input frames are patchified with a P&times;P convolution, then processed by <strong>spatial self-attention</strong> independently within each frame to capture intra-frame relationships such as object appearance and spatial layout.
+          </p>
+          <p class="content has-text-justified" style="font-size:0.95rem; line-height:1.7;">
+            A second transformer stack performs <strong>temporal self-attention</strong> across frames at each patch position to capture motion patterns and temporal dependencies. This factorized design preserves temporal modeling capacity while avoiding the prohibitive cost of joint attention over all tokens.
+          </p>
+          <p class="content has-text-justified" style="font-size:0.95rem; line-height:1.7; color:#64748b;">
+            The resulting temporally contextualized patch tokens are pooled to yield per-frame video representations F &isin; R<sup>T&times;D</sup> used by HORNet for frame selection. We set P=16, T=32, D=768.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Visual Results: Frame Comparison -->
+  <section class="frame-comparison-section" id="visual-results">
+    <div class="container is-max-desktop">
+      <h2 class="title is-3 has-text-centered mb-2">Visual Results: Frame Selection Comparison</h2>
+      <p class="has-text-centered mb-5" style="color:#64748b; max-width:700px; margin:0 auto 2rem;">
+        See how <strong>HORNet</strong> selects semantically relevant frames compared to <strong>Qwen's uniform sampling</strong> baseline. 
+        HORNet focuses on action-critical moments while discarding distractors.
+      </p>
+
+      <div class="comparison-carousel" id="comparison-carousel">
+        <!-- Slide 1: Example placeholder -->
+        <div class="comparison-slide active">
+          <div class="comparison-card">
+            <div class="comparison-header">
+              <h4>Example 1: NExT-QA Temporal Reasoning</h4>
+              <span class="question-badge">Q: How does the boy in black react while the boy on the green disc goes down?</span>
+            </div>
+            <div class="comparison-body">
+              <!-- Baseline (Uniform) -->
+              <div class="method-row">
+                <div class="method-label">
+                  <span class="method-badge baseline">Qwen Uniform Sampling (8 frames)</span>
+                  <span style="font-size:0.8rem; color:#94a3b8;">— Evenly spaced, misses key moment</span>
+                </div>
+                <div class="frames-strip baseline-strip">
+                  <div class="frame-placeholder">Frame 1</div>
+                  <div class="frame-placeholder">Frame 32</div>
+                  <div class="frame-placeholder">Frame 64</div>
+                  <div class="frame-placeholder">Frame 96</div>
+                  <div class="frame-placeholder">Frame 128</div>
+                  <div class="frame-placeholder">Frame 160</div>
+                  <div class="frame-placeholder">Frame 192</div>
+                  <div class="frame-placeholder">Frame 224</div>
+                </div>
+              </div>
+
+              <!-- HORNet -->
+              <div class="method-row">
+                <div class="method-label">
+                  <span class="method-badge hornet">HORNet Selection (8 frames)</span>
+                  <span style="font-size:0.8rem; color:#94a3b8;">— Focuses on the interaction moment</span>
+                </div>
+                <div class="frames-strip hornet-strip">
+                  <div class="frame-placeholder">Frame 87</div>
+                  <div class="frame-placeholder">Frame 89</div>
+                  <div class="frame-placeholder">Frame 91</div>
+                  <div class="frame-placeholder">Frame 93</div>
+                  <div class="frame-placeholder">Frame 95</div>
+                  <div class="frame-placeholder">Frame 97</div>
+                  <div class="frame-placeholder">Frame 99</div>
+                  <div class="frame-placeholder">Frame 101</div>
+                </div>
+              </div>
+
+              <!-- Temporal Timeline -->
+              <div class="timeline-container">
+                <p style="font-size:0.75rem; color:#94a3b8; margin-bottom:0.5rem;">
+                  <span style="display:inline-block; width:12px; height:12px; background:var(--hornet-red); border-radius:50%; vertical-align:middle; opacity:0.6;"></span> Uniform &nbsp;
+                  <span style="display:inline-block; width:12px; height:12px; background:var(--hornet-green); border-radius:50%; vertical-align:middle;"></span> HORNet
+                </p>
+                <div class="timeline-bar">
+                  <!-- Uniform markers (evenly spaced) -->
+                  <span class="timeline-marker uniform" style="left:3%"></span>
+                  <span class="timeline-marker uniform" style="left:14%"></span>
+                  <span class="timeline-marker uniform" style="left:28%"></span>
+                  <span class="timeline-marker uniform" style="left:42%"></span>
+                  <span class="timeline-marker uniform" style="left:56%"></span>
+                  <span class="timeline-marker uniform" style="left:70%"></span>
+                  <span class="timeline-marker uniform" style="left:84%"></span>
+                  <span class="timeline-marker uniform" style="left:97%"></span>
+                  <!-- HORNet markers (clustered around key event) -->
+                  <span class="timeline-marker hornet-selected" style="left:34%"></span>
+                  <span class="timeline-marker hornet-selected" style="left:36%"></span>
+                  <span class="timeline-marker hornet-selected" style="left:38%"></span>
+                  <span class="timeline-marker hornet-selected" style="left:40%"></span>
+                  <span class="timeline-marker hornet-selected" style="left:42%"></span>
+                  <span class="timeline-marker hornet-selected" style="left:44%"></span>
+                  <span class="timeline-marker hornet-selected" style="left:46%"></span>
+                  <span class="timeline-marker hornet-selected" style="left:48%"></span>
+                </div>
+              </div>
+
+              <!-- Verdicts -->
+              <div class="verdict-row">
+                <div class="verdict-item gt">
+                  <div class="verdict-label">Ground Truth</div>
+                  <div>Look at him</div>
+                </div>
+                <div class="verdict-item incorrect">
+                  <div class="verdict-label">Qwen (Uniform) <i class="fas fa-times" style="color:var(--hornet-red);"></i></div>
+                  <div>Stabilise himself</div>
+                </div>
+                <div class="verdict-item correct">
+                  <div class="verdict-label">HORNet <i class="fas fa-check" style="color:var(--hornet-green);"></i></div>
+                  <div>Look at him</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Slide 2 -->
+        <div class="comparison-slide">
+          <div class="comparison-card">
+            <div class="comparison-header">
+              <h4>Example 2: NExT-QA Open-Ended</h4>
+              <span class="question-badge">Q: What is the person doing before eating?</span>
+            </div>
+            <div class="comparison-body">
+              <div class="method-row">
+                <div class="method-label">
+                  <span class="method-badge baseline">Qwen Uniform Sampling (8 frames)</span>
+                  <span style="font-size:0.8rem; color:#94a3b8;">— Captures computer work, misses eating setup</span>
+                </div>
+                <div class="frames-strip baseline-strip">
+                  <div class="frame-placeholder">Frame 1</div>
+                  <div class="frame-placeholder">Frame 40</div>
+                  <div class="frame-placeholder">Frame 80</div>
+                  <div class="frame-placeholder">Frame 120</div>
+                  <div class="frame-placeholder">Frame 160</div>
+                  <div class="frame-placeholder">Frame 200</div>
+                  <div class="frame-placeholder">Frame 240</div>
+                  <div class="frame-placeholder">Frame 280</div>
+                </div>
+              </div>
+
+              <div class="method-row">
+                <div class="method-label">
+                  <span class="method-badge hornet">HORNet Selection (8 frames)</span>
+                  <span style="font-size:0.8rem; color:#94a3b8;">— Selects transition to eating</span>
+                </div>
+                <div class="frames-strip hornet-strip">
+                  <div class="frame-placeholder">Frame 145</div>
+                  <div class="frame-placeholder">Frame 152</div>
+                  <div class="frame-placeholder">Frame 158</div>
+                  <div class="frame-placeholder">Frame 163</div>
+                  <div class="frame-placeholder">Frame 170</div>
+                  <div class="frame-placeholder">Frame 176</div>
+                  <div class="frame-placeholder">Frame 183</div>
+                  <div class="frame-placeholder">Frame 190</div>
+                </div>
+              </div>
+
+              <div class="timeline-container">
+                <p style="font-size:0.75rem; color:#94a3b8; margin-bottom:0.5rem;">
+                  <span style="display:inline-block; width:12px; height:12px; background:var(--hornet-red); border-radius:50%; vertical-align:middle; opacity:0.6;"></span> Uniform &nbsp;
+                  <span style="display:inline-block; width:12px; height:12px; background:var(--hornet-green); border-radius:50%; vertical-align:middle;"></span> HORNet
+                </p>
+                <div class="timeline-bar">
+                  <span class="timeline-marker uniform" style="left:0%"></span>
+                  <span class="timeline-marker uniform" style="left:14%"></span>
+                  <span class="timeline-marker uniform" style="left:28%"></span>
+                  <span class="timeline-marker uniform" style="left:42%"></span>
+                  <span class="timeline-marker uniform" style="left:56%"></span>
+                  <span class="timeline-marker uniform" style="left:70%"></span>
+                  <span class="timeline-marker uniform" style="left:84%"></span>
+                  <span class="timeline-marker uniform" style="left:97%"></span>
+                  <span class="timeline-marker hornet-selected" style="left:50%"></span>
+                  <span class="timeline-marker hornet-selected" style="left:53%"></span>
+                  <span class="timeline-marker hornet-selected" style="left:55%"></span>
+                  <span class="timeline-marker hornet-selected" style="left:57%"></span>
+                  <span class="timeline-marker hornet-selected" style="left:59%"></span>
+                  <span class="timeline-marker hornet-selected" style="left:62%"></span>
+                  <span class="timeline-marker hornet-selected" style="left:64%"></span>
+                  <span class="timeline-marker hornet-selected" style="left:66%"></span>
+                </div>
+              </div>
+
+              <div class="verdict-row">
+                <div class="verdict-item gt">
+                  <div class="verdict-label">Ground Truth</div>
+                  <div>Working at computer</div>
+                </div>
+                <div class="verdict-item incorrect">
+                  <div class="verdict-label">Qwen (Uniform) <i class="fas fa-times" style="color:var(--hornet-red);"></i></div>
+                  <div>Sitting down</div>
+                </div>
+                <div class="verdict-item correct">
+                  <div class="verdict-label">HORNet <i class="fas fa-check" style="color:var(--hornet-green);"></i></div>
+                  <div>Working at computer</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Slide 3 -->
+        <div class="comparison-slide">
+          <div class="comparison-card">
+            <div class="comparison-header">
+              <h4>Example 3: ActivityNet-QA</h4>
+              <span class="question-badge">Q: What does the child discard before going down the slide?</span>
+            </div>
+            <div class="comparison-body">
+              <div class="method-row">
+                <div class="method-label">
+                  <span class="method-badge baseline">Qwen Uniform Sampling (8 frames)</span>
+                  <span style="font-size:0.8rem; color:#94a3b8;">— Shows crawling, misses discard action</span>
+                </div>
+                <div class="frames-strip baseline-strip">
+                  <div class="frame-placeholder">Frame 1</div>
+                  <div class="frame-placeholder">Frame 50</div>
+                  <div class="frame-placeholder">Frame 100</div>
+                  <div class="frame-placeholder">Frame 150</div>
+                  <div class="frame-placeholder">Frame 200</div>
+                  <div class="frame-placeholder">Frame 250</div>
+                  <div class="frame-placeholder">Frame 300</div>
+                  <div class="frame-placeholder">Frame 350</div>
+                </div>
+              </div>
+
+              <div class="method-row">
+                <div class="method-label">
+                  <span class="method-badge hornet">HORNet Selection (8 frames)</span>
+                  <span style="font-size:0.8rem; color:#94a3b8;">— Captures the cart discard moment</span>
+                </div>
+                <div class="frames-strip hornet-strip">
+                  <div class="frame-placeholder">Frame 112</div>
+                  <div class="frame-placeholder">Frame 118</div>
+                  <div class="frame-placeholder">Frame 124</div>
+                  <div class="frame-placeholder">Frame 130</div>
+                  <div class="frame-placeholder">Frame 136</div>
+                  <div class="frame-placeholder">Frame 142</div>
+                  <div class="frame-placeholder">Frame 148</div>
+                  <div class="frame-placeholder">Frame 154</div>
+                </div>
+              </div>
+
+              <div class="timeline-container">
+                <p style="font-size:0.75rem; color:#94a3b8; margin-bottom:0.5rem;">
+                  <span style="display:inline-block; width:12px; height:12px; background:var(--hornet-red); border-radius:50%; vertical-align:middle; opacity:0.6;"></span> Uniform &nbsp;
+                  <span style="display:inline-block; width:12px; height:12px; background:var(--hornet-green); border-radius:50%; vertical-align:middle;"></span> HORNet
+                </p>
+                <div class="timeline-bar">
+                  <span class="timeline-marker uniform" style="left:0%"></span>
+                  <span class="timeline-marker uniform" style="left:14%"></span>
+                  <span class="timeline-marker uniform" style="left:28%"></span>
+                  <span class="timeline-marker uniform" style="left:42%"></span>
+                  <span class="timeline-marker uniform" style="left:56%"></span>
+                  <span class="timeline-marker uniform" style="left:70%"></span>
+                  <span class="timeline-marker uniform" style="left:84%"></span>
+                  <span class="timeline-marker uniform" style="left:97%"></span>
+                  <span class="timeline-marker hornet-selected" style="left:30%"></span>
+                  <span class="timeline-marker hornet-selected" style="left:32%"></span>
+                  <span class="timeline-marker hornet-selected" style="left:34%"></span>
+                  <span class="timeline-marker hornet-selected" style="left:36%"></span>
+                  <span class="timeline-marker hornet-selected" style="left:38%"></span>
+                  <span class="timeline-marker hornet-selected" style="left:40%"></span>
+                  <span class="timeline-marker hornet-selected" style="left:42%"></span>
+                  <span class="timeline-marker hornet-selected" style="left:44%"></span>
+                </div>
+              </div>
+
+              <div class="verdict-row">
+                <div class="verdict-item gt">
+                  <div class="verdict-label">Ground Truth</div>
+                  <div>The cart</div>
+                </div>
+                <div class="verdict-item incorrect">
+                  <div class="verdict-label">Qwen (Uniform) <i class="fas fa-times" style="color:var(--hornet-red);"></i></div>
+                  <div>The toy</div>
+                </div>
+                <div class="verdict-item correct">
+                  <div class="verdict-label">HORNet <i class="fas fa-check" style="color:var(--hornet-green);"></i></div>
+                  <div>The cart</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Carousel Nav -->
+      <div class="carousel-nav-bar">
+        <button class="carousel-nav-btn" id="comp-prev" onclick="changeCompSlide(-1)">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <span class="carousel-indicator" id="comp-counter">1 / 3</span>
+        <button class="carousel-nav-btn" id="comp-next" onclick="changeCompSlide(1)">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+
+      <p class="has-text-centered mt-5" style="font-size:0.85rem; color:#94a3b8;">
+        <em>Frame images will be added. Placeholders show frame indices selected by each method.</em>
+      </p>
+    </div>
+  </section>
+
+  <!-- Quantitative Results -->
+  <section class="section results-section">
+    <div class="container is-max-desktop">
+      <h2 class="title is-3 has-text-centered mb-5">Quantitative Results</h2>
+
+      <!-- Open-Ended QA -->
+      <h3 class="title is-4 mb-4">Open-Ended QA Results</h3>
+      <div class="table-wrapper mb-6">
+        <table class="table is-striped is-hoverable is-fullwidth" style="font-size:0.85rem;">
+          <thead>
+            <tr style="background:#f1f5f9;">
+              <th>Dataset</th>
+              <th>Model</th>
+              <th class="has-text-centered">F1-Lev &uarr;</th>
+              <th class="has-text-centered">Frame Sel. (s) &darr;</th>
+              <th class="has-text-centered">Qwen Proc. (s) &darr;</th>
+              <th class="has-text-centered">Avg. Frames &darr;</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td rowspan="2"><strong>MSVD-QA</strong></td>
+              <td>Qwen3-VL-2B (Baseline)</td>
+              <td class="has-text-centered">0.3483</td>
+              <td class="has-text-centered">—</td>
+              <td class="has-text-centered">0.28</td>
+              <td class="has-text-centered">11.65</td>
+            </tr>
+            <tr style="background:#ecfdf5;">
+              <td><strong>HORNet + Qwen3-VL-2B</strong></td>
+              <td class="has-text-centered"><strong>0.3543</strong> <span style="color:var(--hornet-green);">+1.7%</span></td>
+              <td class="has-text-centered">0.12</td>
+              <td class="has-text-centered">0.10 <span style="color:var(--hornet-green);">&darr;64%</span></td>
+              <td class="has-text-centered">4.00 <span style="color:var(--hornet-green);">&darr;66%</span></td>
+            </tr>
+            <tr>
+              <td rowspan="2"><strong>MSRVTT-QA</strong></td>
+              <td>Qwen3-VL-2B (Baseline)</td>
+              <td class="has-text-centered">0.3209</td>
+              <td class="has-text-centered">—</td>
+              <td class="has-text-centered">0.58</td>
+              <td class="has-text-centered">47.52</td>
+            </tr>
+            <tr style="background:#fef2f2;">
+              <td><strong>HORNet + Qwen3-VL-2B</strong></td>
+              <td class="has-text-centered">0.3029 <span style="color:var(--hornet-red);">-5.6%</span></td>
+              <td class="has-text-centered">0.09</td>
+              <td class="has-text-centered">0.09 <span style="color:var(--hornet-green);">&darr;84%</span></td>
+              <td class="has-text-centered">4.00 <span style="color:var(--hornet-green);">&darr;92%</span></td>
+            </tr>
+            <tr>
+              <td rowspan="2"><strong>NExT-QA OE</strong></td>
+              <td>Qwen3-VL-2B (Baseline)</td>
+              <td class="has-text-centered">0.3045</td>
+              <td class="has-text-centered">—</td>
+              <td class="has-text-centered">1.01</td>
+              <td class="has-text-centered">1157.88</td>
+            </tr>
+            <tr style="background:#fef2f2;">
+              <td><strong>HORNet + Qwen3-VL-2B</strong></td>
+              <td class="has-text-centered">0.2738 <span style="color:var(--hornet-red);">-10.1%</span></td>
+              <td class="has-text-centered">0.52</td>
+              <td class="has-text-centered">0.19 <span style="color:var(--hornet-green);">&darr;81%</span></td>
+              <td class="has-text-centered">8.00 <span style="color:var(--hornet-green);">&darr;99%</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- MCQ Results -->
+      <h3 class="title is-4 mb-4">Multiple-Choice QA Results</h3>
+      <div class="table-wrapper mb-6">
+        <table class="table is-striped is-hoverable is-fullwidth" style="font-size:0.85rem;">
+          <thead>
+            <tr style="background:#f1f5f9;">
+              <th>Dataset</th>
+              <th>Model</th>
+              <th class="has-text-centered">Accuracy (%) &uarr;</th>
+              <th class="has-text-centered">Frame Sel. (s) &darr;</th>
+              <th class="has-text-centered">Qwen Proc. (s) &darr;</th>
+              <th class="has-text-centered">Avg. Frames &darr;</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td rowspan="2"><strong>VideoMME</strong></td>
+              <td>Qwen3-VL-2B (Baseline)</td>
+              <td class="has-text-centered">68.30</td>
+              <td class="has-text-centered">—</td>
+              <td class="has-text-centered">2.53</td>
+              <td class="has-text-centered">3066.73</td>
+            </tr>
+            <tr>
+              <td><strong>HORNet + Qwen3-VL-2B</strong></td>
+              <td class="has-text-centered">52.10 <span style="color:var(--hornet-red);">-16.2%</span></td>
+              <td class="has-text-centered">1.51</td>
+              <td class="has-text-centered">0.18 <span style="color:var(--hornet-green);">&darr;93%</span></td>
+              <td class="has-text-centered">8.00 <span style="color:var(--hornet-green);">&darr;99%</span></td>
+            </tr>
+            <tr>
+              <td rowspan="2"><strong>ActivityNet-QA</strong></td>
+              <td>Qwen3-VL-2B (Baseline)</td>
+              <td class="has-text-centered">75.00</td>
+              <td class="has-text-centered">—</td>
+              <td class="has-text-centered">2.37</td>
+              <td class="has-text-centered">3152.49</td>
+            </tr>
+            <tr>
+              <td><strong>HORNet + Qwen3-VL-2B</strong></td>
+              <td class="has-text-centered">68.80 <span style="color:var(--hornet-red);">-6.2%</span></td>
+              <td class="has-text-centered">1.64</td>
+              <td class="has-text-centered">0.17 <span style="color:var(--hornet-green);">&darr;93%</span></td>
+              <td class="has-text-centered">8.00 <span style="color:var(--hornet-green);">&darr;99%</span></td>
+            </tr>
+            <tr>
+              <td rowspan="2"><strong>NExT-QA MCQ</strong></td>
+              <td>Qwen3-VL-2B (Baseline)</td>
+              <td class="has-text-centered">76.80</td>
+              <td class="has-text-centered">—</td>
+              <td class="has-text-centered">0.98</td>
+              <td class="has-text-centered">1157.88</td>
+            </tr>
+            <tr>
+              <td><strong>HORNet + Qwen3-VL-2B</strong></td>
+              <td class="has-text-centered">71.50 <span style="color:var(--hornet-red);">-5.3%</span></td>
+              <td class="has-text-centered">0.53</td>
+              <td class="has-text-centered">0.25 <span style="color:var(--hornet-green);">&darr;74%</span></td>
+              <td class="has-text-centered">8.00 <span style="color:var(--hornet-green);">&darr;99%</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Ablation Tables Side by Side -->
+      <div class="ablation-row">
+        <div class="ablation-col">
+          <h3 class="title is-5 mb-3">Frame Selection Strategy</h3>
+          <p class="mb-4" style="color:#64748b; font-size:0.85rem;">
+            All methods select 4 frames. On NExT-QA, HORNet outperforms uniform by <strong>+7.3 points</strong>.
+          </p>
+          <div class="table-wrapper">
+            <table class="table is-striped is-hoverable is-fullwidth" style="font-size:0.85rem;">
+              <thead>
+                <tr style="background:#f1f5f9;">
+                  <th>Strategy</th>
+                  <th class="has-text-centered">MSVD</th>
+                  <th class="has-text-centered">MSRVTT</th>
+                  <th class="has-text-centered">NExT-QA</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Random</td>
+                  <td class="has-text-centered">0.3527</td>
+                  <td class="has-text-centered">0.3027</td>
+                  <td class="has-text-centered">65.88</td>
+                </tr>
+                <tr>
+                  <td>Uniform</td>
+                  <td class="has-text-centered">0.3493</td>
+                  <td class="has-text-centered">0.3058</td>
+                  <td class="has-text-centered">64.24</td>
+                </tr>
+                <tr style="background:#fffbeb;">
+                  <td><strong>HORNet</strong></td>
+                  <td class="has-text-centered"><strong>0.3543</strong></td>
+                  <td class="has-text-centered">0.3029</td>
+                  <td class="has-text-centered"><strong>71.50</strong></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="ablation-col">
+          <h3 class="title is-5 mb-3">VLM Answerer Transfer</h3>
+          <p class="mb-4" style="color:#64748b; font-size:0.85rem;">
+            Same HORNet policy, different VLM. <strong>+8.5% gain</strong> with stronger model.
+          </p>
+          <div class="table-wrapper">
+            <table class="table is-striped is-hoverable is-fullwidth" style="font-size:0.85rem;">
+              <thead>
+                <tr style="background:#f1f5f9;">
+                  <th>VLM Answerer</th>
+                  <th class="has-text-centered">Size</th>
+                  <th class="has-text-centered">F1-Lev &uarr;</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Qwen3-VL (baseline)</td>
+                  <td class="has-text-centered">2B</td>
+                  <td class="has-text-centered">0.3483</td>
+                </tr>
+                <tr>
+                  <td>Qwen3-VL + HORNet</td>
+                  <td class="has-text-centered">2B</td>
+                  <td class="has-text-centered">0.3543</td>
+                </tr>
+                <tr style="background:#fffbeb;">
+                  <td><strong>Qwen2.5-VL + HORNet</strong></td>
+                  <td class="has-text-centered">3B</td>
+                  <td class="has-text-centered"><strong>0.3846</strong></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BibTeX -->
+  <section class="bibtex-section" id="bibtex">
+    <div class="container is-max-desktop">
+      <h2 class="title is-3 has-text-centered" style="color:white;">Citation</h2>
+      <div class="bibtex-box">
+        <button class="copy-btn" onclick="copyBibtex()">
+          <i class="fas fa-copy"></i> Copy
+        </button>
+        <pre><code>@article{bai2026hornet,
+  title={HORNet: Task-Guided Frame Selection for Video Question 
+         Answering with Vision-Language Models},
+  author={Bai, Xiangyu and Galoaa, Bishoy and Ostadabbas, Sarah},
+  journal={arXiv preprint arXiv:2603.18850},
+  year={2026}
+}</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="hornet-footer">
+    <div class="container">
+      <p>
+        <strong>HORNet</strong> &mdash; 
+        <a href="https://github.com/ostadabbas/HORNet" target="_blank">GitHub</a> &bull; 
+        <a href="https://arxiv.org/abs/2603.18850" target="_blank">arXiv</a> &bull; 
+        <a href="https://huggingface.co/bishoygaloaa/HORnet" target="_blank">HuggingFace</a>
+      </p>
+      <p style="margin-top:0.5rem; font-size:0.8rem;">
+        Augmented Cognition Lab &bull; Northeastern University &bull; 2026
+      </p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script>
+    // Scroll to top button
+    window.addEventListener('scroll', () => {
+      const btn = document.getElementById('scrollTopBtn');
+      btn.style.display = window.scrollY > 300 ? 'block' : 'none';
+    });
+
+    // Comparison Carousel
+    let currentCompSlide = 0;
+    const compSlides = document.querySelectorAll('.comparison-slide');
+
+    function changeCompSlide(dir) {
+      currentCompSlide = Math.max(0, Math.min(compSlides.length - 1, currentCompSlide + dir));
+      compSlides.forEach((s, i) => s.classList.toggle('active', i === currentCompSlide));
+      document.getElementById('comp-counter').textContent = `${currentCompSlide + 1} / ${compSlides.length}`;
+      document.getElementById('comp-prev').disabled = currentCompSlide === 0;
+      document.getElementById('comp-next').disabled = currentCompSlide === compSlides.length - 1;
+    }
+
+    // Copy BibTeX
+    function copyBibtex() {
+      const text = document.querySelector('.bibtex-box code').textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.querySelector('.copy-btn');
+        btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+        setTimeout(() => { btn.innerHTML = '<i class="fas fa-copy"></i> Copy'; }, 2000);
+      });
+    }
+  </script>
+</body>
+</html>
