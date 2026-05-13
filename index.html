@@ -250,11 +250,13 @@
     .frames-strip {
       display: flex;
       gap: 4px;
-      overflow-x: auto;
+      overflow-x: hidden;
       padding: 8px;
       background: #f1f5f9;
       border-radius: 8px;
       position: relative;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     .frames-strip::before {
@@ -302,6 +304,30 @@
       font-size: 0.65rem;
       color: #94a3b8;
       flex-shrink: 0;
+    }
+
+    .frame-thumb-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1 1 0;
+      min-width: 0;
+      gap: 3px;
+    }
+
+    .frame-thumb-wrap .frame-thumb {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      border-radius: 4px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .frame-label {
+      font-size: 0.6rem;
+      color: #64748b;
+      font-weight: 600;
+      white-space: nowrap;
     }
 
     /* Timeline visualization */
@@ -769,271 +795,12 @@
     <div class="container is-max-desktop">
       <h2 class="title is-3 has-text-centered mb-2">Visual Results: Frame Selection Comparison</h2>
       <p class="has-text-centered mb-5" style="color:#64748b; max-width:700px; margin:0 auto 2rem;">
-        See how <strong>HORNet</strong> selects semantically relevant frames compared to <strong>Qwen's uniform sampling</strong> baseline. 
+        See how <strong>HORNet</strong> selects semantically relevant frames compared to <strong>uniform sampling</strong>.
         HORNet focuses on action-critical moments while discarding distractors.
       </p>
 
       <div class="comparison-carousel" id="comparison-carousel">
-        <!-- Slide 1: Example placeholder -->
-        <div class="comparison-slide active">
-          <div class="comparison-card">
-            <div class="comparison-header">
-              <h4>Example 1: NExT-QA Temporal Reasoning</h4>
-              <span class="question-badge">Q: How does the boy in black react while the boy on the green disc goes down?</span>
-            </div>
-            <div class="comparison-body">
-              <!-- Baseline (Uniform) -->
-              <div class="method-row">
-                <div class="method-label">
-                  <span class="method-badge baseline">Qwen Uniform Sampling (8 frames)</span>
-                  <span style="font-size:0.8rem; color:#94a3b8;">— Evenly spaced, misses key moment</span>
-                </div>
-                <div class="frames-strip baseline-strip">
-                  <div class="frame-placeholder">Frame 1</div>
-                  <div class="frame-placeholder">Frame 32</div>
-                  <div class="frame-placeholder">Frame 64</div>
-                  <div class="frame-placeholder">Frame 96</div>
-                  <div class="frame-placeholder">Frame 128</div>
-                  <div class="frame-placeholder">Frame 160</div>
-                  <div class="frame-placeholder">Frame 192</div>
-                  <div class="frame-placeholder">Frame 224</div>
-                </div>
-              </div>
-
-              <!-- HORNet -->
-              <div class="method-row">
-                <div class="method-label">
-                  <span class="method-badge hornet">HORNet Selection (8 frames)</span>
-                  <span style="font-size:0.8rem; color:#94a3b8;">— Focuses on the interaction moment</span>
-                </div>
-                <div class="frames-strip hornet-strip">
-                  <div class="frame-placeholder">Frame 87</div>
-                  <div class="frame-placeholder">Frame 89</div>
-                  <div class="frame-placeholder">Frame 91</div>
-                  <div class="frame-placeholder">Frame 93</div>
-                  <div class="frame-placeholder">Frame 95</div>
-                  <div class="frame-placeholder">Frame 97</div>
-                  <div class="frame-placeholder">Frame 99</div>
-                  <div class="frame-placeholder">Frame 101</div>
-                </div>
-              </div>
-
-              <!-- Temporal Timeline -->
-              <div class="timeline-container">
-                <p style="font-size:0.75rem; color:#94a3b8; margin-bottom:0.5rem;">
-                  <span style="display:inline-block; width:12px; height:12px; background:var(--hornet-red); border-radius:50%; vertical-align:middle; opacity:0.6;"></span> Uniform &nbsp;
-                  <span style="display:inline-block; width:12px; height:12px; background:var(--hornet-green); border-radius:50%; vertical-align:middle;"></span> HORNet
-                </p>
-                <div class="timeline-bar">
-                  <!-- Uniform markers (evenly spaced) -->
-                  <span class="timeline-marker uniform" style="left:3%"></span>
-                  <span class="timeline-marker uniform" style="left:14%"></span>
-                  <span class="timeline-marker uniform" style="left:28%"></span>
-                  <span class="timeline-marker uniform" style="left:42%"></span>
-                  <span class="timeline-marker uniform" style="left:56%"></span>
-                  <span class="timeline-marker uniform" style="left:70%"></span>
-                  <span class="timeline-marker uniform" style="left:84%"></span>
-                  <span class="timeline-marker uniform" style="left:97%"></span>
-                  <!-- HORNet markers (clustered around key event) -->
-                  <span class="timeline-marker hornet-selected" style="left:34%"></span>
-                  <span class="timeline-marker hornet-selected" style="left:36%"></span>
-                  <span class="timeline-marker hornet-selected" style="left:38%"></span>
-                  <span class="timeline-marker hornet-selected" style="left:40%"></span>
-                  <span class="timeline-marker hornet-selected" style="left:42%"></span>
-                  <span class="timeline-marker hornet-selected" style="left:44%"></span>
-                  <span class="timeline-marker hornet-selected" style="left:46%"></span>
-                  <span class="timeline-marker hornet-selected" style="left:48%"></span>
-                </div>
-              </div>
-
-              <!-- Verdicts -->
-              <div class="verdict-row">
-                <div class="verdict-item gt">
-                  <div class="verdict-label">Ground Truth</div>
-                  <div>Look at him</div>
-                </div>
-                <div class="verdict-item incorrect">
-                  <div class="verdict-label">Qwen (Uniform) <i class="fas fa-times" style="color:var(--hornet-red);"></i></div>
-                  <div>Stabilise himself</div>
-                </div>
-                <div class="verdict-item correct">
-                  <div class="verdict-label">HORNet <i class="fas fa-check" style="color:var(--hornet-green);"></i></div>
-                  <div>Look at him</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Slide 2 -->
-        <div class="comparison-slide">
-          <div class="comparison-card">
-            <div class="comparison-header">
-              <h4>Example 2: NExT-QA Open-Ended</h4>
-              <span class="question-badge">Q: What is the person doing before eating?</span>
-            </div>
-            <div class="comparison-body">
-              <div class="method-row">
-                <div class="method-label">
-                  <span class="method-badge baseline">Qwen Uniform Sampling (8 frames)</span>
-                  <span style="font-size:0.8rem; color:#94a3b8;">— Captures computer work, misses eating setup</span>
-                </div>
-                <div class="frames-strip baseline-strip">
-                  <div class="frame-placeholder">Frame 1</div>
-                  <div class="frame-placeholder">Frame 40</div>
-                  <div class="frame-placeholder">Frame 80</div>
-                  <div class="frame-placeholder">Frame 120</div>
-                  <div class="frame-placeholder">Frame 160</div>
-                  <div class="frame-placeholder">Frame 200</div>
-                  <div class="frame-placeholder">Frame 240</div>
-                  <div class="frame-placeholder">Frame 280</div>
-                </div>
-              </div>
-
-              <div class="method-row">
-                <div class="method-label">
-                  <span class="method-badge hornet">HORNet Selection (8 frames)</span>
-                  <span style="font-size:0.8rem; color:#94a3b8;">— Selects transition to eating</span>
-                </div>
-                <div class="frames-strip hornet-strip">
-                  <div class="frame-placeholder">Frame 145</div>
-                  <div class="frame-placeholder">Frame 152</div>
-                  <div class="frame-placeholder">Frame 158</div>
-                  <div class="frame-placeholder">Frame 163</div>
-                  <div class="frame-placeholder">Frame 170</div>
-                  <div class="frame-placeholder">Frame 176</div>
-                  <div class="frame-placeholder">Frame 183</div>
-                  <div class="frame-placeholder">Frame 190</div>
-                </div>
-              </div>
-
-              <div class="timeline-container">
-                <p style="font-size:0.75rem; color:#94a3b8; margin-bottom:0.5rem;">
-                  <span style="display:inline-block; width:12px; height:12px; background:var(--hornet-red); border-radius:50%; vertical-align:middle; opacity:0.6;"></span> Uniform &nbsp;
-                  <span style="display:inline-block; width:12px; height:12px; background:var(--hornet-green); border-radius:50%; vertical-align:middle;"></span> HORNet
-                </p>
-                <div class="timeline-bar">
-                  <span class="timeline-marker uniform" style="left:0%"></span>
-                  <span class="timeline-marker uniform" style="left:14%"></span>
-                  <span class="timeline-marker uniform" style="left:28%"></span>
-                  <span class="timeline-marker uniform" style="left:42%"></span>
-                  <span class="timeline-marker uniform" style="left:56%"></span>
-                  <span class="timeline-marker uniform" style="left:70%"></span>
-                  <span class="timeline-marker uniform" style="left:84%"></span>
-                  <span class="timeline-marker uniform" style="left:97%"></span>
-                  <span class="timeline-marker hornet-selected" style="left:50%"></span>
-                  <span class="timeline-marker hornet-selected" style="left:53%"></span>
-                  <span class="timeline-marker hornet-selected" style="left:55%"></span>
-                  <span class="timeline-marker hornet-selected" style="left:57%"></span>
-                  <span class="timeline-marker hornet-selected" style="left:59%"></span>
-                  <span class="timeline-marker hornet-selected" style="left:62%"></span>
-                  <span class="timeline-marker hornet-selected" style="left:64%"></span>
-                  <span class="timeline-marker hornet-selected" style="left:66%"></span>
-                </div>
-              </div>
-
-              <div class="verdict-row">
-                <div class="verdict-item gt">
-                  <div class="verdict-label">Ground Truth</div>
-                  <div>Working at computer</div>
-                </div>
-                <div class="verdict-item incorrect">
-                  <div class="verdict-label">Qwen (Uniform) <i class="fas fa-times" style="color:var(--hornet-red);"></i></div>
-                  <div>Sitting down</div>
-                </div>
-                <div class="verdict-item correct">
-                  <div class="verdict-label">HORNet <i class="fas fa-check" style="color:var(--hornet-green);"></i></div>
-                  <div>Working at computer</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Slide 3 -->
-        <div class="comparison-slide">
-          <div class="comparison-card">
-            <div class="comparison-header">
-              <h4>Example 3: ActivityNet-QA</h4>
-              <span class="question-badge">Q: What does the child discard before going down the slide?</span>
-            </div>
-            <div class="comparison-body">
-              <div class="method-row">
-                <div class="method-label">
-                  <span class="method-badge baseline">Qwen Uniform Sampling (8 frames)</span>
-                  <span style="font-size:0.8rem; color:#94a3b8;">— Shows crawling, misses discard action</span>
-                </div>
-                <div class="frames-strip baseline-strip">
-                  <div class="frame-placeholder">Frame 1</div>
-                  <div class="frame-placeholder">Frame 50</div>
-                  <div class="frame-placeholder">Frame 100</div>
-                  <div class="frame-placeholder">Frame 150</div>
-                  <div class="frame-placeholder">Frame 200</div>
-                  <div class="frame-placeholder">Frame 250</div>
-                  <div class="frame-placeholder">Frame 300</div>
-                  <div class="frame-placeholder">Frame 350</div>
-                </div>
-              </div>
-
-              <div class="method-row">
-                <div class="method-label">
-                  <span class="method-badge hornet">HORNet Selection (8 frames)</span>
-                  <span style="font-size:0.8rem; color:#94a3b8;">— Captures the cart discard moment</span>
-                </div>
-                <div class="frames-strip hornet-strip">
-                  <div class="frame-placeholder">Frame 112</div>
-                  <div class="frame-placeholder">Frame 118</div>
-                  <div class="frame-placeholder">Frame 124</div>
-                  <div class="frame-placeholder">Frame 130</div>
-                  <div class="frame-placeholder">Frame 136</div>
-                  <div class="frame-placeholder">Frame 142</div>
-                  <div class="frame-placeholder">Frame 148</div>
-                  <div class="frame-placeholder">Frame 154</div>
-                </div>
-              </div>
-
-              <div class="timeline-container">
-                <p style="font-size:0.75rem; color:#94a3b8; margin-bottom:0.5rem;">
-                  <span style="display:inline-block; width:12px; height:12px; background:var(--hornet-red); border-radius:50%; vertical-align:middle; opacity:0.6;"></span> Uniform &nbsp;
-                  <span style="display:inline-block; width:12px; height:12px; background:var(--hornet-green); border-radius:50%; vertical-align:middle;"></span> HORNet
-                </p>
-                <div class="timeline-bar">
-                  <span class="timeline-marker uniform" style="left:0%"></span>
-                  <span class="timeline-marker uniform" style="left:14%"></span>
-                  <span class="timeline-marker uniform" style="left:28%"></span>
-                  <span class="timeline-marker uniform" style="left:42%"></span>
-                  <span class="timeline-marker uniform" style="left:56%"></span>
-                  <span class="timeline-marker uniform" style="left:70%"></span>
-                  <span class="timeline-marker uniform" style="left:84%"></span>
-                  <span class="timeline-marker uniform" style="left:97%"></span>
-                  <span class="timeline-marker hornet-selected" style="left:30%"></span>
-                  <span class="timeline-marker hornet-selected" style="left:32%"></span>
-                  <span class="timeline-marker hornet-selected" style="left:34%"></span>
-                  <span class="timeline-marker hornet-selected" style="left:36%"></span>
-                  <span class="timeline-marker hornet-selected" style="left:38%"></span>
-                  <span class="timeline-marker hornet-selected" style="left:40%"></span>
-                  <span class="timeline-marker hornet-selected" style="left:42%"></span>
-                  <span class="timeline-marker hornet-selected" style="left:44%"></span>
-                </div>
-              </div>
-
-              <div class="verdict-row">
-                <div class="verdict-item gt">
-                  <div class="verdict-label">Ground Truth</div>
-                  <div>The cart</div>
-                </div>
-                <div class="verdict-item incorrect">
-                  <div class="verdict-label">Qwen (Uniform) <i class="fas fa-times" style="color:var(--hornet-red);"></i></div>
-                  <div>The toy</div>
-                </div>
-                <div class="verdict-item correct">
-                  <div class="verdict-label">HORNet <i class="fas fa-check" style="color:var(--hornet-green);"></i></div>
-                  <div>The cart</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <!-- Slides injected by JS -->
       </div>
 
       <!-- Carousel Nav -->
@@ -1041,17 +808,267 @@
         <button class="carousel-nav-btn" id="comp-prev" onclick="changeCompSlide(-1)">
           <i class="fas fa-chevron-left"></i>
         </button>
-        <span class="carousel-indicator" id="comp-counter">1 / 3</span>
+        <span class="carousel-indicator" id="comp-counter">1 / 1</span>
         <button class="carousel-nav-btn" id="comp-next" onclick="changeCompSlide(1)">
           <i class="fas fa-chevron-right"></i>
         </button>
       </div>
-
-      <p class="has-text-centered mt-5" style="font-size:0.85rem; color:#94a3b8;">
-        <em>Frame images will be added. Placeholders show frame indices selected by each method.</em>
-      </p>
     </div>
   </section>
+
+  <script>
+  // ── Visual Samples Data ──────────────────────────────────────────────────────
+  // Frame files are named frame_XXXXXX.jpg where XXXXXX is a 0-31 index.
+  // Sorted file indices map positionally to sorted ours_indices / uniform_indices.
+  // e.g. the i-th file (sorted) corresponds to the i-th real frame index in the array.
+
+  const visualSamples = [
+    {
+      video_id: 1, total_frames: 2388,
+      question: "why did the man scoop some sand and pour into the back of the truck",
+      ground_truth: "play with the baby",
+      answer_ours: "to make a sandcastle",
+      answer_uniform: "to fill the truck with sand",
+      ours_indices: [0, 895, 970, 1641, 1716, 2089, 2164, 2313],
+      ours_files:    [0, 12, 13, 22, 23, 28, 29, 31],
+      uniform_indices: [0, 298, 597, 895, 1194, 1492, 1791, 2089],
+      uniform_files:   [0, 4, 8, 12, 16, 20, 24, 28]
+    },
+    {
+      video_id: 2, total_frames: 2214,
+      question: "why does the baby bend down near the tree",
+      ground_truth: "pick up snow ball",
+      answer_ours: "to play with the snow",
+      answer_uniform: "to look at the tree",
+      ours_indices: [0, 1245, 1452, 1591, 1729, 1798, 1868, 2144],
+      ours_files:    [0, 18, 21, 23, 25, 26, 27, 31],
+      uniform_indices: [0, 276, 553, 830, 1107, 1383, 1660, 1937],
+      uniform_files:   [0, 4, 8, 12, 16, 20, 24, 28]
+    },
+    {
+      video_id: 191, total_frames: 2566,
+      question: "where is this place",
+      ground_truth: "park",
+      answer_ours: "a park in japan",
+      answer_uniform: "japan",
+      ours_indices: [160, 240, 962, 1042, 1764, 2325, 2405, 2485],
+      ours_files:    [2, 3, 12, 13, 22, 29, 30, 31],
+      uniform_indices: [0, 320, 641, 962, 1283, 1603, 1924, 2245],
+      uniform_files:   [0, 4, 8, 12, 16, 20, 24, 28]
+    },
+    {
+      video_id: 194, total_frames: 585,
+      question: "what does the boy do when he realises the baby is crying",
+      ground_truth: "puts his face next to baby",
+      answer_ours: "he hugs the baby",
+      answer_uniform: "he smiles and laughs",
+      ours_indices: [0, 201, 329, 347, 383, 420, 493, 511],
+      ours_files:    [0, 11, 18, 19, 21, 23, 27, 28],
+      uniform_indices: [0, 73, 146, 219, 292, 365, 438, 511],
+      uniform_files:   [0, 4, 8, 12, 16, 20, 24, 28]
+    },
+    {
+      video_id: 204, total_frames: 519,
+      question: "what did the boy do when the big white dog was running over the brown dog after the middle part of the video",
+      ground_truth: "walks away",
+      answer_ours: "the boy ran away from the dog.",
+      answer_uniform: "the boy ran after the big white dog.",
+      ours_indices: [178, 194, 291, 308, 324, 356, 373, 454],
+      ours_files:    [11, 12, 18, 19, 20, 22, 23, 28],
+      uniform_indices: [0, 64, 129, 194, 259, 324, 389, 454],
+      uniform_files:   [0, 4, 8, 12, 16, 20, 24, 28]
+    },
+    {
+      video_id: 205, total_frames: 797,
+      question: "what does the dog do after sitting up at the end",
+      ground_truth: "leave",
+      answer_ours: "the dog stands up and walks away",
+      answer_uniform: "the dog looks up at the camera",
+      ours_indices: [124, 273, 298, 323, 348, 722, 747, 772],
+      ours_files:    [5, 11, 12, 13, 14, 29, 30, 31],
+      uniform_indices: [0, 99, 199, 298, 398, 498, 597, 697],
+      uniform_files:   [0, 4, 8, 12, 16, 20, 24, 28]
+    },
+    {
+      video_id: 213, total_frames: 1239,
+      question: "how does the man grab the boy",
+      ground_truth: "pull boy s hands",
+      answer_ours: "with his hands",
+      answer_uniform: "he grabs the boy's legs",
+      ours_indices: [77, 503, 619, 929, 967, 1006, 1084, 1122],
+      ours_files:    [2, 13, 16, 24, 25, 26, 28, 29],
+      uniform_indices: [0, 154, 309, 464, 619, 774, 929, 1084],
+      uniform_files:   [0, 4, 8, 12, 16, 20, 24, 28]
+    },
+    {
+      video_id: 263, total_frames: 756,
+      question: "why did the girl bend down periodically to look at her feet",
+      ground_truth: "look at what she stepped",
+      answer_ours: "she was checking for something on her feet",
+      answer_uniform: "she was checking her shoes",
+      ours_indices: [283, 307, 378, 401, 425, 448, 472, 732],
+      ours_files:    [12, 13, 16, 17, 18, 19, 20, 31],
+      uniform_indices: [0, 94, 189, 283, 378, 472, 567, 661],
+      uniform_files:   [0, 4, 8, 12, 16, 20, 24, 28]
+    },
+    {
+      video_id: 267, total_frames: 1609,
+      question: "how many rabbits are there in the video",
+      ground_truth: "two",
+      answer_ours: "2",
+      answer_uniform: "1",
+      ours_indices: [0, 50, 201, 603, 854, 905, 955, 1407],
+      ours_files:    [0, 1, 4, 12, 17, 18, 19, 28],
+      uniform_indices: [0, 201, 402, 603, 804, 1005, 1206, 1407],
+      uniform_files:   [0, 4, 8, 12, 16, 20, 24, 28]
+    },
+    {
+      video_id: 303, total_frames: 1971,
+      question: "what do the people do after turning around near the middle",
+      ground_truth: "dance",
+      answer_ours: "they dance",
+      answer_uniform: "they jump on the stage",
+      ours_indices: [1108, 1478, 1539, 1601, 1724, 1786, 1847, 1909],
+      ours_files:    [18, 24, 25, 26, 28, 29, 30, 31],
+      uniform_indices: [0, 246, 492, 739, 985, 1231, 1478, 1724],
+      uniform_files:   [0, 4, 8, 12, 16, 20, 24, 28]
+    },
+    {
+      video_id: 384, total_frames: 507,
+      question: "why does the child run across the room",
+      ground_truth: "to pick up the gift",
+      answer_ours: "to get to the toy",
+      answer_uniform: "to get to the door",
+      ours_indices: [285, 301, 316, 332, 348, 364, 380, 396],
+      ours_files:    [18, 19, 20, 21, 22, 23, 24, 25],
+      uniform_indices: [0, 63, 126, 190, 253, 316, 380, 443],
+      uniform_files:   [0, 4, 8, 12, 16, 20, 24, 28]
+    },
+    {
+      video_id: 387, total_frames: 629,
+      question: "how did the girl move her arms while reading",
+      ground_truth: "up and down",
+      answer_ours: "she moved her arms up and down",
+      answer_uniform: "she moved her arms to point at the pictures",
+      ours_indices: [0, 19, 58, 353, 550, 570, 589, 609],
+      ours_files:    [0, 1, 3, 18, 28, 29, 30, 31],
+      uniform_indices: [0, 78, 157, 235, 314, 393, 471, 550],
+      uniform_files:   [0, 4, 8, 12, 16, 20, 24, 28]
+    },
+    {
+      video_id: 468, total_frames: 825,
+      question: "what is in the background of the video",
+      ground_truth: "computer screen",
+      answer_ours: "a computer monitor",
+      answer_uniform: "a white wall",
+      ours_indices: [283, 309, 464, 696, 721, 747, 773, 799],
+      ours_files:    [11, 12, 18, 27, 28, 29, 30, 31],
+      uniform_indices: [0, 103, 206, 309, 412, 515, 618, 721],
+      uniform_files:   [0, 4, 8, 12, 16, 20, 24, 28]
+    }
+  ];
+
+  function padNum(n, len) {
+    return String(n).padStart(len, '0');
+  }
+
+  function buildFrameStrips(sample) {
+    const tf = sample.total_frames;
+    const basePath_ours    = `visual_samples/ours/sample_${sample.video_id}/`;
+    const basePath_uniform = `visual_samples/uniform/sample_${sample.video_id}/`;
+
+    function buildStrip(files, indices, basePath, stripClass) {
+      return `<div class="frames-strip ${stripClass}">` +
+        files.map((fileIdx, i) => {
+          const realFrame = indices[i];
+          const pct = Math.round((realFrame / (tf - 1)) * 100);
+          return `<div class="frame-thumb-wrap">
+            <img class="frame-thumb" src="${basePath}frame_${padNum(fileIdx, 6)}.jpg"
+                 alt="Frame ${realFrame}"
+                 onerror="this.parentElement.innerHTML='<div class=frame-placeholder style=min-width:80px;height:60px>Frame<br>${realFrame}</div>'">
+            <div class="frame-label">${realFrame}</div>
+          </div>`;
+        }).join('') +
+      `</div>`;
+    }
+
+    const uniformStrip = buildStrip(sample.uniform_files, sample.uniform_indices, basePath_uniform, 'baseline-strip');
+    const oursStrip    = buildStrip(sample.ours_files,    sample.ours_indices,    basePath_ours,    'hornet-strip');
+
+    // Timeline markers
+    function timelineMarkers(indices, cls) {
+      return indices.map(idx => {
+        const pct = ((idx / (tf - 1)) * 96 + 2).toFixed(1);
+        return `<span class="timeline-marker ${cls}" style="left:${pct}%"></span>`;
+      }).join('');
+    }
+
+    const isCorrect  = sample.answer_ours.toLowerCase().includes(sample.ground_truth.toLowerCase()) ||
+                       sample.ground_truth.toLowerCase().includes(sample.answer_ours.toLowerCase());
+    const isWrong    = sample.answer_uniform.toLowerCase().includes(sample.ground_truth.toLowerCase()) ||
+                       sample.ground_truth.toLowerCase().includes(sample.answer_uniform.toLowerCase());
+
+    return `
+      <div class="comparison-card">
+        <div class="comparison-header">
+          <h4>Video #${sample.video_id} &nbsp;<span style="font-size:0.75rem;opacity:0.6;">(${tf.toLocaleString()} frames total)</span></h4>
+          <span class="question-badge">Q: ${sample.question}</span>
+        </div>
+        <div class="comparison-body">
+          <div class="method-row">
+            <div class="method-label">
+              <span class="method-badge baseline">Uniform Sampling (8 frames)</span>
+            </div>
+            ${uniformStrip}
+          </div>
+          <div class="method-row">
+            <div class="method-label">
+              <span class="method-badge hornet">HORNet Selection (8 frames)</span>
+            </div>
+            ${oursStrip}
+          </div>
+          <div class="timeline-container">
+            <p style="font-size:0.75rem; color:#94a3b8; margin-bottom:0.5rem;">
+              <span style="display:inline-block;width:12px;height:12px;background:var(--hornet-red);border-radius:50%;vertical-align:middle;opacity:0.6;"></span> Uniform &nbsp;
+              <span style="display:inline-block;width:12px;height:12px;background:var(--hornet-green);border-radius:50%;vertical-align:middle;"></span> HORNet
+              <span style="margin-left:1rem;color:#94a3b8;">— position on video timeline</span>
+            </p>
+            <div class="timeline-bar">
+              ${timelineMarkers(sample.uniform_indices, 'uniform')}
+              ${timelineMarkers(sample.ours_indices, 'hornet-selected')}
+            </div>
+          </div>
+          <div class="verdict-row">
+            <div class="verdict-item gt">
+              <div class="verdict-label">Ground Truth</div>
+              <div>${sample.ground_truth}</div>
+            </div>
+            <div class="verdict-item ${isWrong ? 'correct' : 'incorrect'}">
+              <div class="verdict-label">Uniform <i class="fas fa-${isWrong ? 'check' : 'times'}" style="color:var(--hornet-${isWrong ? 'green' : 'red'});"></i></div>
+              <div>${sample.answer_uniform}</div>
+            </div>
+            <div class="verdict-item ${isCorrect ? 'correct' : 'incorrect'}">
+              <div class="verdict-label">HORNet <i class="fas fa-${isCorrect ? 'check' : 'times'}" style="color:var(--hornet-${isCorrect ? 'green' : 'red'});"></i></div>
+              <div>${sample.answer_ours}</div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  // Build all slides
+  const carousel = document.getElementById('comparison-carousel');
+  visualSamples.forEach((sample, idx) => {
+    const slide = document.createElement('div');
+    slide.className = 'comparison-slide' + (idx === 0 ? ' active' : '');
+    slide.innerHTML = buildFrameStrips(sample);
+    carousel.appendChild(slide);
+  });
+
+  // Update counter
+  document.getElementById('comp-counter').textContent = `1 / ${visualSamples.length}`;
+  document.getElementById('comp-prev').disabled = true;
+  </script>
 
   <!-- Quantitative Results -->
   <section class="section results-section">

@@ -1,0 +1,25 @@
+{"video_id": 1, "total_frames": 2388, "question": "why did the man scoop some sand and pour into the back of the truck", "ground_truth": "play with the baby", "answer_ours": "to make a sandcastle", "answer_uniform": "to fill the truck with sand", "ours_indices": [0, 895, 970, 1641, 1716, 2089, 2164, 2313], "uniform_indices": [0, 298, 597, 895, 1194, 1492, 1791, 2089]}
+
+{"video_id": 2, "total_frames": 2214, "question": "why does the baby bend down near the tree", "ground_truth": "pick up snow ball", "answer_ours": "to play with the snow", "answer_uniform": "to look at the tree", "ours_indices": [0, 1245, 1452, 1591, 1729, 1798, 1868, 2144], "uniform_indices": [0, 276, 553, 830, 1107, 1383, 1660, 1937]}
+
+{"video_id": 191, "total_frames": 2566, "question": "where is this place", "ground_truth": "park", "answer_ours": "a park in japan", "answer_uniform": "japan", "ours_indices": [160, 240, 962, 1042, 1764, 2325, 2405, 2485], "uniform_indices": [0, 320, 641, 962, 1283, 1603, 1924, 2245]}
+
+{"video_id": 194, "total_frames": 585, "question": "what does the boy do when he realises the baby is crying", "ground_truth": "puts his face next to baby", "answer_ours": "he hugs the baby", "answer_uniform": "he smiles and laughs", "ours_indices": [0, 201, 329, 347, 383, 420, 493, 511], "uniform_indices": [0, 73, 146, 219, 292, 365, 438, 511]}
+
+{"video_id": 204, "total_frames": 519, "question": "what did the boy do when the big white dog was running over the brown dog after the middle part of the video", "ground_truth": "walks away", "answer_ours": "the boy ran away from the dog.", "answer_uniform": "the boy ran after the big white dog.", "ours_indices": [178, 194, 291, 308, 324, 356, 373, 454], "uniform_indices": [0, 64, 129, 194, 259, 324, 389, 454]}
+
+{"video_id": 205, "total_frames": 797, "question": "what does the dog do after sitting up at the end", "ground_truth": "leave", "answer_ours": "the dog stands up and walks away", "answer_uniform": "the dog looks up at the camera", "ours_indices": [124, 273, 298, 323, 348, 722, 747, 772], "uniform_indices": [0, 99, 199, 298, 398, 498, 597, 697]}
+
+{"video_id": 213, "total_frames": 1239, "question": "how does the man grab the boy", "ground_truth": "pull boy s hands", "answer_ours": "with his hands", "answer_uniform": "he grabs the boy's legs", "ours_indices": [77, 503, 619, 929, 967, 1006, 1084, 1122], "uniform_indices": [0, 154, 309, 464, 619, 774, 929, 1084]}
+
+{"video_id": 263, "total_frames": 756, "question": "why did the girl bend down periodically to look at her feet", "ground_truth": "look at what she stepped", "answer_ours": "she was checking for something on her feet", "answer_uniform": "she was checking her shoes", "ours_indices": [283, 307, 378, 401, 425, 448, 472, 732], "uniform_indices": [0, 94, 189, 283, 378, 472, 567, 661]}
+
+{"video_id": 267, "total_frames": 1609, "question": "how many rabbits are there in the video", "ground_truth": "two", "answer_ours": "2", "answer_uniform": "1", "ours_indices": [0, 50, 201, 603, 854, 905, 955, 1407], "uniform_indices": [0, 201, 402, 603, 804, 1005, 1206, 1407]}
+
+{"video_id": 303, "total_frames": 1971, "question": "what do the people do after turning around near the middle", "ground_truth": "dance", "answer_ours": "they dance", "answer_uniform": "they jump on the stage", "ours_indices": [1108, 1478, 1539, 1601, 1724, 1786, 1847, 1909], "uniform_indices": [0, 246, 492, 739, 985, 1231, 1478, 1724]}
+
+{"video_id": 384, "total_frames": 507, "question": "why does the child run across the room", "ground_truth": "to pick up the gift", "answer_ours": "to get to the toy", "answer_uniform": "to get to the door", "ours_indices": [285, 301, 316, 332, 348, 364, 380, 396], "uniform_indices": [0, 63, 126, 190, 253, 316, 380, 443]}
+
+{"video_id": 387, "total_frames": 629, "question": "how did the girl move her arms while reading", "ground_truth": "up and down", "answer_ours": "she moved her arms up and down", "answer_uniform": "she moved her arms to point at the pictures", "ours_indices": [0, 19, 58, 353, 550, 570, 589, 609], "uniform_indices": [0, 78, 157, 235, 314, 393, 471, 550]}
+
+"video_id": 468, "total_frames": 825, "question": "what is in the background of the video", "ground_truth": "computer screen", "answer_ours": "a computer monitor", "answer_uniform": "a white wall", "ours_indices": [283, 309, 464, 696, 721, 747, 773, 799], "uniform_indices": [0, 103, 206, 309, 412, 515, 618, 721]}
