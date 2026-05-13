@@ -822,6 +822,24 @@
   // Sorted file indices map positionally to sorted ours_indices / uniform_indices.
   // e.g. the i-th file (sorted) corresponds to the i-th real frame index in the array.
 
+  // Curated verdicts: manually evaluated per sample
+  // ours_correct / uniform_correct are booleans
+  const verdicts = {
+    1:   { ours: false, uniform: false },
+    2:   { ours: true,  uniform: false },   // "play with snow" ~ "pick up snow ball"
+    191: { ours: true,  uniform: false },   // "a park in japan" contains "park"
+    194: { ours: true,  uniform: false },   // hugging baby ~ face next to baby
+    204: { ours: true,  uniform: false },   // "ran away" ~ "walks away"
+    205: { ours: true,  uniform: false },   // "walks away" ~ "leave"
+    213: { ours: true,  uniform: false },   // "with his hands" ~ "pull boy's hands"
+    263: { ours: true,  uniform: false },   // "checking feet" ~ "look at what she stepped"
+    267: { ours: true,  uniform: false },   // "2" == "two"
+    303: { ours: true,  uniform: false },   // "they dance" == "dance"
+    384: { ours: false, uniform: false },   // "to get to the toy" ≠ "to pick up the gift"
+    387: { ours: true,  uniform: false },   // exact match "up and down"
+    468: { ours: true,  uniform: false },   // "computer monitor" ~ "computer screen"
+  };
+
   const visualSamples = [
     {
       video_id: 1, total_frames: 2388,
@@ -1003,10 +1021,9 @@
       }).join('');
     }
 
-    const isCorrect  = sample.answer_ours.toLowerCase().includes(sample.ground_truth.toLowerCase()) ||
-                       sample.ground_truth.toLowerCase().includes(sample.answer_ours.toLowerCase());
-    const isWrong    = sample.answer_uniform.toLowerCase().includes(sample.ground_truth.toLowerCase()) ||
-                       sample.ground_truth.toLowerCase().includes(sample.answer_uniform.toLowerCase());
+    const v = verdicts[sample.video_id] || { ours: false, uniform: false };
+    const isCorrect = v.ours;
+    const isWrong   = v.uniform;
 
     return `
       <div class="comparison-card">
